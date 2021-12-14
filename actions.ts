@@ -1,4 +1,5 @@
 import { App, Editor, Vault } from 'obsidian';
+import type { EditorPosition, EditorSelection } from 'obsidian';
 import {
   CASE,
   DIRECTION,
@@ -82,6 +83,9 @@ export const duplicateLine = (editor: Editor) => {
 };
 
 export const selectWord = (editor: Editor) => {
+  const { cm } = editor as unknown as {
+    cm: { findWordAt: (pos: EditorPosition) => EditorSelection };
+  };
   const selections = editor.listSelections();
   const newSelections = selections.map((selection) => {
     const { from, to } = getSelectionBoundaries(selection);
@@ -90,7 +94,7 @@ export const selectWord = (editor: Editor) => {
     if (selectedText.length !== 0) {
       return selection;
     } else {
-      return wordRangeAtPos(from, editor.getLine(from.line));
+      return cm.findWordAt(from);
     }
   });
   editor.setSelections(newSelections);
